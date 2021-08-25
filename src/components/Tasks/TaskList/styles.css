@@ -26,6 +26,20 @@
   cursor: grab;
 }
 
+.Task-error {
+  width: 400px;
+  background: #D9534F;
+  border-bottom: 1px solid #eee;
+  padding: 3px 15px;
+  font-family: "Roboto", sans-serif;
+  font-size: 11px;
+  color: #fff;
+}
+
+.Task-error p{
+  margin: 0;
+}
+
 .Task input {
   width: 100%;
   font-family: "Roboto", sans-serif;
@@ -33,6 +47,7 @@
   border: none;
   outline: none;
 }
+
 .Task span {
   display: inline-block;
   font-family: monospace;

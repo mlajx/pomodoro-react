@@ -8,6 +8,7 @@ import './styles.css';
 
 const TaskList = ({ selectedTaskType }) => {
   const [input, setInput] = useState('');
+  const [inputError, setInputError] = useState(false);
   const taskStatus = [
     { name: 'All', value: -1 },
     { name: 'Open', value: false },
@@ -26,15 +27,24 @@ const TaskList = ({ selectedTaskType }) => {
   function move(from, to) {
     setTasks(
       produce(tasks, draft => {
-        const taskMoved = draft[from];
-        draft.splice(from, 1);
-        draft.splice(to, 0, taskMoved);
+        const fromIndex = draft.findIndex(item => item.id === from.id);
+        const toIndex = draft.findIndex(item => item.id === to.id);
+        const draftFrom = draft[fromIndex];
+        const draftTo = draft[toIndex];
+        
+        const orderFromFlag = draftFrom.order;
+        draftFrom.order = draftTo.order;
+        draftTo.order = orderFromFlag;
       })
     );
   }
 
+  function handleInput(e) {
+    setInputError(false);    
+    setInput(e.target.value);
+  }
+  
   function handleStatus(task) {
-    console.log('task:', task);
     setTasks(
       produce(tasks, draft => {
         const foundIndex = draft.findIndex(item => item.id === task.id);
@@ -44,9 +54,14 @@ const TaskList = ({ selectedTaskType }) => {
   }
 
   function addTask() {
+    if (!input.length) {
+      setInputError(true);
+      return;
+    }
+    
     setTasks(
       produce(tasks, draft => {
-        draft.push({ id: draft.length + 1, title: input, closed: false });
+        draft.push({id: draft.length + 1, title: input, closed: false, order: tasks.length + 1});
       })
     );
     setInput('');
@@ -68,8 +83,9 @@ const TaskList = ({ selectedTaskType }) => {
                   task.closed === selectedStatus.value ||
                   selectedStatus.value === -1
               )
-              .map((task, index) => (
-                <Task key={task.id} index={index} task={task} />
+              .sort((a, b) => a.order > b.order)
+              .map((task) => (
+                <Task key={task.id} task={task} />
               ))
           ) : (
             <div className="Task">No Tasks</div>
@@ -79,11 +95,16 @@ const TaskList = ({ selectedTaskType }) => {
       <div className="Task">
         <input
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={handleInput}
           placeholder="New Task"
         />
         <span onClick={addTask}>{'Add'}</span>
       </div>
+      {inputError ? (
+        <div className="Task-error">
+          <p>Please, enter a task name before to add.</p>
+        </div>
+      ) : (<div/>)}
     </TaskContext.Provider>
   );
 };

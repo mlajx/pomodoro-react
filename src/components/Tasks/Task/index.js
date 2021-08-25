@@ -4,11 +4,11 @@ import './styles.css';
 
 import TaskContext from '../TaskList/context';
 
-export default function Task({ task, index }) {
+export default function Task({ task }) {
   const ref = useRef();
   const { move, handleStatus } = useContext(TaskContext);
   const [{ isDragging }, dragRef] = useDrag({
-    item: { type: 'TASK', id: task.id, index },
+    item: { type: 'TASK', id: task.id, order: task.order },
     collect: monitor => ({
       isDragging: monitor.isDragging()
     })
@@ -18,18 +18,7 @@ export default function Task({ task, index }) {
     accept: 'TASK',
     hover(item, monitor) {
       if (item.id === task.id) return;
-      const dragged = item;
-      const target = task;
-      const targetSize = ref.current.getBoundingClientRect();
-      const targetCenter = (targetSize.bottom - targetSize.top) / 2;
-      const draggedOffset = monitor.getClientOffset();
-      const draggedTop = draggedOffset.y - targetSize.top;
-
-      if (dragged.order < target.order && draggedTop < targetCenter) return;
-      if (dragged.order > target.order && draggedTop > targetCenter) return;
-
-      move(item.index, index);
-      item.index = index;
+      move(item, task);
     }
   });
 
